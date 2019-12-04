@@ -1,0 +1,23 @@
+{
+  "name": "jirasprinttracker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "background.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zizhongzhang/JiraSprintTracker.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zizhongzhang/JiraSprintTracker/issues"
+  },
+  "homepage": "https://github.com/zizhongzhang/JiraSprintTracker#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "prettier": "^1.19.1"
+  }
+}
