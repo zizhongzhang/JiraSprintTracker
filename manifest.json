@@ -24,6 +24,5 @@
         "32": "images/sprint_tracker32.png",
         "48": "images/sprint_tracker48.png",
         "128": "images/sprint_tracker128.png"
-    },
-    "options_page": "options.html"
+    }
 }
