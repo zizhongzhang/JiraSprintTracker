@@ -10,7 +10,7 @@
     "manifest_version": 2,
     "content_scripts": [
         {
-            "matches": ["https://{jira_domain}/*"],
+            "matches": ["https://jira.teamxero.com/*"],
             "js": ["myscript.js"]
         }
     ],

@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-'use strict';
+'use strict'
 
-let changeColor = document.getElementById('changeColor');
-chrome.storage.sync.get('color', function(data) {
-  changeColor.style.backgroundColor = data.color;
-  changeColor.setAttribute('value', data.color);
-});
+let input = document.getElementById('boardId')
 
-changeColor.onclick = function(element) {
-  let color = element.target.value;
-  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    chrome.tabs.executeScript(
-        tabs[0].id,
-        {code: 'document.body.style.backgroundColor = "' + color + '";'});
-  });
-};
+input.onchange = function(element) {
+    let value = element.target.value
+    chrome.storage.sync.set({boardId: value}, function() {
+      console.log(`board id is ${boardId}.`);
+    });
+
+    chrome.runtime.sendMessage({ boardId: value }, function(response) {
+        console.log(response.farewell)
+    })
+    localStorage.setItem('boardId', value)
+}

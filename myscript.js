@@ -1,17 +1,36 @@
 if (
     document.location.href.indexOf(
-        'https://{jira_domain}/secure/RapidBoard.jspa?rapidView=2206'
+        'https://jira.teamxero.com/secure/RapidBoard.jspa?rapidView=2206'
     ) != -1
 ) {
 
-    chrome.runtime.sendMessage({greeting: "hello"}, function(response) {
-        console.log(response.farewell);
+    chrome.storage.sync.get('boardId', function(data) {
+        console.log('------------------------- PRINT OUT -------------------------');
+        console.log(data.boardId);
       });
-      
+
+    chrome.runtime.sendMessage({ greeting: 'hello' }, function(response) {
+        console.log(response.farewell)
+    })
+
+    // const boardId = localStorage.getItem('boardId')
+    // console.log('board id: ' + boardId)
+
+    chrome.runtime.onMessage.addListener(function(
+        request,
+        sender,
+        sendResponse
+    ) {
+        if (request.boardId) {
+            console.log('board id: ' + request.boardId)
+        }
+        sendResponse({farewell: "goodbye from content scripts"});
+    })
+
     var xhr = new XMLHttpRequest()
     xhr.open(
         'GET',
-        'https://{jira_domain}/rest/agile/1.0/board/2206/sprint?state=active',
+        'https://jira.teamxero.com/rest/agile/1.0/board/2206/sprint?state=active',
         true
     )
     xhr.onreadystatechange = function() {
@@ -25,7 +44,7 @@ if (
 
     xhr.open(
         'GET',
-        'https://{jira_domain}/rest/agile/1.0/sprint/10323/issue',
+        'https://jira.teamxero.com/rest/agile/1.0/sprint/10323/issue',
         true
     )
     xhr.onreadystatechange = function() {
@@ -49,7 +68,7 @@ if (
                 "div[data-sprint-id='10323'] span.days-left"
             )
             const remainingDays = element.textContent.match(/^\d+/g, '')[0]
-                
+
             const expectedPoints = getExpectedPoints(
                 totalPoints,
                 sprintDuration,
@@ -67,7 +86,7 @@ if (
             const message = `- ${Math.abs(percentageDiff)}% (${Math.abs(
                 pointDiff
             )}pts) ${pointDiff > 0 ? 'ahead' : 'behind'}`
-            
+
             element.textContent += message
         }
     }
