@@ -2,11 +2,15 @@
     "name": "Jira Sprint Tracker",
     "version": "1.0",
     "description": "Lightweight solution to tell you how much you are ahead/behind in current sprint",
-    "permissions": ["storage"],
+    "permissions": ["declarativeContent", "storage"],
+    "background": {
+        "scripts": ["background.js"],
+        "persistent": false
+    },
     "manifest_version": 2,
     "content_scripts": [
         {
-            "matches": ["https://*/*"],
+            "matches": ["https://jira.teamxero.com/*"],
             "js": ["myscript.js"]
         }
     ],
