@@ -7,6 +7,7 @@ const jiraEndpoints = {
     sprintIssue: sprintId =>
         `${origin}/rest/agile/1.0/sprint/${sprintId}/issue`,
 }
+const arrayNotEmpty = array => Array.isArray(array) && array.length
 const displaySprintInfoByBoardId = (boardId, completeStatus, excludeStatus) => {
     var xhr = new XMLHttpRequest()
     xhr.open('GET', jiraEndpoints.activeSprint(boardId), true)
@@ -29,7 +30,9 @@ const displaySprintInfoByBoardId = (boardId, completeStatus, excludeStatus) => {
         xhr.onreadystatechange = function() {
             if (xhr.readyState == 4) {
                 let json = JSON.parse(xhr.responseText)
-                const issuesToExlude = filter(json.issues, excludeStatus)
+                const issuesToExlude = arrayNotEmpty(excludeStatus)
+                    ? filter(json.issues, excludeStatus)
+                    : []
 
                 let totalPoints = json.issues
                     .filter(function(el) {
@@ -110,8 +113,8 @@ if (matchedValues) {
     chrome.storage.sync.get('status', function(data) {
         const completeStatus = data.status.completeStatus
         const excludeStatus = data.status.excludeStatus
-        const arrayNotEmpty = array => Array.isArray(array) && array.length
-        if (arrayNotEmpty(completeStatus) && arrayNotEmpty(excludeStatus)) {
+
+        if (arrayNotEmpty(completeStatus)) {
             displaySprintInfoByBoardId(boardId, completeStatus, excludeStatus)
         }
     })
