@@ -1,7 +1,7 @@
 {
     "name": "Jira Sprint Tracker",
     "version": "1.0",
-    "description": "Tell you how much you are ahead/behind in current sprint",
+    "description": "Lightweight solution to tell you how much you are ahead/behind in current sprint",
     "permissions": ["storage"],
     "manifest_version": 2,
     "content_scripts": [
