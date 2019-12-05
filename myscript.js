@@ -40,7 +40,8 @@ const displaySprintInfoByBoardId = boardId => {
                     .filter(
                         x =>
                             x.fields.status.name == 'Ready for Live' ||
-                            x.fields.status.name == 'Done'
+                            x.fields.status.name == 'Done' ||
+                            x.fields.status.name == 'Released'
                     )
                     .map(x => x.fields['customfield_10004'])
                     .reduce((a, b) => a + b, 0)
