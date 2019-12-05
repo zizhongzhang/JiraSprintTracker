@@ -72,7 +72,18 @@ const displaySprintInfoByBoardId = (boardId, completeStatus, excludeStatus) => {
                     pointDiff
                 )}pts) ${pointDiff > 0 ? 'ahead' : 'behind'}`
 
-                element.textContent += message
+                if (pointDiff > 0) {
+                    element.textContent += message
+                    element.style.color = 'green'
+                    element.style.padding = '5px'
+                    element.style.fontWeight = 'bold'
+                } else {
+                    element.textContent += message
+                    element.style.color = 'white'
+                    element.style.padding = '5px'
+                    element.style.fontWeight = 'bold'
+                    element.style.backgroundColor = 'red'
+                }
             }
         }
         xhr.send()
