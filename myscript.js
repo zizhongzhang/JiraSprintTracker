@@ -7,36 +7,38 @@ const jiraEndpoints = {
     sprintIssue: sprintId =>
         `${origin}/rest/agile/1.0/sprint/${sprintId}/issue`,
 }
-const displaySprintInfoByBoardId = boardId => {
+const displaySprintInfoByBoardId = (boardId, completeStatus, excludeStatus) => {
     var xhr = new XMLHttpRequest()
     xhr.open('GET', jiraEndpoints.activeSprint(boardId), true)
     xhr.onreadystatechange = function() {
         if (xhr.readyState == 4) {
             var json = JSON.parse(xhr.responseText)
             const sprintId = json.values[0].id
-            displaySprintInfoBySprintId(sprintId)
+            displaySprintInfoBySprintId(sprintId, completeStatus, excludeStatus)
         }
     }
     xhr.send()
 
-    const displaySprintInfoBySprintId = sprintId => {
+    const displaySprintInfoBySprintId = (
+        sprintId,
+        completeStatus,
+        excludeStatus
+    ) => {
         var xhr = new XMLHttpRequest()
         xhr.open('GET', jiraEndpoints.sprintIssue(sprintId), true)
         xhr.onreadystatechange = function() {
             if (xhr.readyState == 4) {
                 let json = JSON.parse(xhr.responseText)
+                const issuesToExlude = filter(json.issues, excludeStatus)
+
                 let totalPoints = json.issues
-                    .filter(x => x.fields.status.name != 'Cancelled')
+                    .filter(function(el) {
+                        return issuesToExlude.indexOf(el) < 0
+                    })
                     .map(x => x.fields['customfield_10004'])
                     .reduce((a, b) => a + b, 0)
 
-                let actualPoints = json.issues
-                    .filter(
-                        x =>
-                            x.fields.status.name == 'Ready for Live' ||
-                            x.fields.status.name == 'Done' ||
-                            x.fields.status.name == 'Released'
-                    )
+                let actualPoints = filter(json.issues, completeStatus)
                     .map(x => x.fields['customfield_10004'])
                     .reduce((a, b) => a + b, 0)
 
@@ -84,13 +86,33 @@ const displaySprintInfoByBoardId = boardId => {
         const format = value => {
             return Math.round(Math.abs(value))
         }
+
+        const filter = (issues, statuses) => {
+            let newIssues = []
+            statuses.forEach(status => {
+                newIssues = newIssues.concat(
+                    issues.filter(
+                        issue =>
+                            issue.fields.status.name.toLowerCase() ===
+                            status.toLowerCase()
+                    )
+                )
+            })
+            return newIssues
+        }
     }
 }
 
 const href = document.location.href
 const matchedValues = href.match(/rapidView=\d+/g, '')
 if (matchedValues) {
-    const boardId = matchedValues[0].match(/\d+/g, '');
-    console.log(boardId);
-    displaySprintInfoByBoardId(boardId)
+    const boardId = matchedValues[0].match(/\d+/g, '')
+    chrome.storage.sync.get('status', function(data) {
+        const completeStatus = data.status.completeStatus
+        const excludeStatus = data.status.excludeStatus
+        const arrayNotEmpty = array => Array.isArray(array) && array.length
+        if (arrayNotEmpty(completeStatus) && arrayNotEmpty(excludeStatus)) {
+            displaySprintInfoByBoardId(boardId, completeStatus, excludeStatus)
+        }
+    })
 }

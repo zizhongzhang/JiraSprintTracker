@@ -1,0 +1,10 @@
+form {
+    width: 450px;
+    height: 280px;
+    padding: 30px;
+}
+
+#save {
+    margin-top:10px;
+    width: 100%;
+}

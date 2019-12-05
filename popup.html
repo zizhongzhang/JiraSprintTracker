@@ -1,10 +1,37 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <!-- <link rel="stylesheet" href="https://edge.xero.com/style/xui/15.2.7/xui.min.css" /> -->
-  </head>
-  <body>
-      <input class="xui-textinput xui-textinput--input" type="text" placeholder="Jira Sprint Link here" aria-label="Standard input" id="sprintLink"/>
-    <script src="popup.js"></script>
-  </body>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link
+            rel="stylesheet"
+            href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        />
+        <link rel="stylesheet" href="popup.css" />
+    </head>
+    <body id="body">
+        <form>
+            <div class="form-group">
+                <label for="completeStatus">Complete status</label>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="completeStatus"
+                    placeholder="Status considered complete. Comma separated"
+                />
+            </div>
+            <div class="form-group">
+                <label for="excludeStatus">Exclude status</label>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="excludeStatus"
+                    placeholder="Status not count in this calculation. Comma separated"
+                />
+            </div>
+            <button type="button" class="btn btn-primary btn-lg" id="save">Save</button>
+        </form>
+
+        <script src="popup.js"></script>
+        <!-- <script src="bootstrap.min.js"></script> -->
+    </body>
 </html>
