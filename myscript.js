@@ -1,9 +1,4 @@
-chrome.storage.sync.get('sprint', function(data) {
-    console.log(data)
-    const boardId = data.sprint.boardId
-    if (boardId && document.location.href.indexOf(data.sprint.link) != -1)
-        displaySprintInfoByBoardId(boardId)
-})
+'use strict'
 
 const origin = document.location.origin
 const jiraEndpoints = {
@@ -12,7 +7,6 @@ const jiraEndpoints = {
     sprintIssue: sprintId =>
         `${origin}/rest/agile/1.0/sprint/${sprintId}/issue`,
 }
-
 const displaySprintInfoByBoardId = boardId => {
     var xhr = new XMLHttpRequest()
     xhr.open('GET', jiraEndpoints.activeSprint(boardId), true)
@@ -91,4 +85,12 @@ const displaySprintInfoByBoardId = boardId => {
             return Math.round(Math.abs(value))
         }
     }
+}
+
+const href = document.location.href
+const matchedValues = href.match(/rapidView=\d+/g, '')
+if (matchedValues) {
+    const boardId = matchedValues[0].match(/\d+/g, '');
+    console.log(boardId);
+    displaySprintInfoByBoardId(boardId)
 }
