@@ -1,12 +1,8 @@
 {
-    "name": "Getting Started Example",
+    "name": "Jira Sprint Tracker",
     "version": "1.0",
-    "description": "Build an Extension!",
-    "permissions": ["activeTab", "declarativeContent", "storage"],
-    "background": {
-        "scripts": ["background.js"],
-        "persistent": false
-    },
+    "description": "Tell you how much you are ahead/behind in current sprint",
+    "permissions": ["storage"],
     "manifest_version": 2,
     "content_scripts": [
         {
@@ -17,17 +13,17 @@
     "page_action": {
         "default_popup": "popup.html",
         "default_icon": {
-            "16": "images/get_started16.png",
-            "32": "images/get_started32.png",
-            "48": "images/get_started48.png",
-            "128": "images/get_started128.png"
+            "16": "images/sprint_tracker16.png",
+            "32": "images/sprint_tracker32.png",
+            "48": "images/sprint_tracker48.png",
+            "128": "images/sprint_tracker128.png"
         }
     },
     "icons": {
-        "16": "images/get_started16.png",
-        "32": "images/get_started32.png",
-        "48": "images/get_started48.png",
-        "128": "images/get_started128.png"
+        "16": "images/sprint_tracker16.png",
+        "32": "images/sprint_tracker32.png",
+        "48": "images/sprint_tracker48.png",
+        "128": "images/sprint_tracker128.png"
     },
     "options_page": "options.html"
 }
