@@ -1,103 +1,93 @@
-if (
-    document.location.href.indexOf(
-        'https://jira.teamxero.com/secure/RapidBoard.jspa?rapidView=2206'
-    ) != -1
-) {
+chrome.storage.sync.get('sprint', function(data) {
+    console.log(data)
+    const boardId = data.sprint.boardId
+    if (boardId && document.location.href.indexOf(data.sprint.link) != -1)
+        displaySprintInfoByBoardId(boardId)
+})
 
-    chrome.storage.sync.get('boardId', function(data) {
-        console.log('------------------------- PRINT OUT -------------------------');
-        console.log(data.boardId);
-      });
+const origin = document.location.origin
+const jiraEndpoints = {
+    activeSprint: boardId =>
+        `${origin}/rest/agile/1.0/board/${boardId}/sprint?state=active`,
+    sprintIssue: sprintId =>
+        `${origin}/rest/agile/1.0/sprint/${sprintId}/issue`,
+}
 
-    chrome.runtime.sendMessage({ greeting: 'hello' }, function(response) {
-        console.log(response.farewell)
-    })
-
-    // const boardId = localStorage.getItem('boardId')
-    // console.log('board id: ' + boardId)
-
-    chrome.runtime.onMessage.addListener(function(
-        request,
-        sender,
-        sendResponse
-    ) {
-        if (request.boardId) {
-            console.log('board id: ' + request.boardId)
-        }
-        sendResponse({farewell: "goodbye from content scripts"});
-    })
-
+const displaySprintInfoByBoardId = boardId => {
     var xhr = new XMLHttpRequest()
-    xhr.open(
-        'GET',
-        'https://jira.teamxero.com/rest/agile/1.0/board/2206/sprint?state=active',
-        true
-    )
+    xhr.open('GET', jiraEndpoints.activeSprint(boardId), true)
     xhr.onreadystatechange = function() {
         if (xhr.readyState == 4) {
-            var resp = JSON.parse(xhr.responseText)
-            console.log(resp)
-            localStorage.setItem('test', resp)
+            var json = JSON.parse(xhr.responseText)
+            const sprintId = json.values[0].id
+            displaySprintInfoBySprintId(sprintId)
         }
     }
     xhr.send()
 
-    xhr.open(
-        'GET',
-        'https://jira.teamxero.com/rest/agile/1.0/sprint/10323/issue',
-        true
-    )
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState == 4) {
-            let json = JSON.parse(xhr.responseText)
-            let totalPoints = json.issues
-                .map(x => x.fields['customfield_10004'])
-                .reduce((a, b) => a + b, 0)
+    const displaySprintInfoBySprintId = sprintId => {
+        var xhr = new XMLHttpRequest()
+        xhr.open('GET', jiraEndpoints.sprintIssue(sprintId), true)
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+                let json = JSON.parse(xhr.responseText)
+                let totalPoints = json.issues
+                    .filter(x => x.fields.status.name != 'Cancelled')
+                    .map(x => x.fields['customfield_10004'])
+                    .reduce((a, b) => a + b, 0)
 
-            let actualPoints = json.issues
-                .filter(
-                    x =>
-                        x.fields.status.name == 'Ready for Live' ||
-                        x.fields.status.name == 'Done'
+                let actualPoints = json.issues
+                    .filter(
+                        x =>
+                            x.fields.status.name == 'Ready for Live' ||
+                            x.fields.status.name == 'Done'
+                    )
+                    .map(x => x.fields['customfield_10004'])
+                    .reduce((a, b) => a + b, 0)
+
+                const sprintDuration = 10
+                let element = document.querySelector(
+                    `div[data-sprint-id='${sprintId}'] span.days-left`
                 )
-                .map(x => x.fields['customfield_10004'])
-                .reduce((a, b) => a + b, 0)
+                const remainingDays = element.textContent.match(/^\d+/g, '')[0]
 
-            const sprintDuration = 10
-            let element = document.querySelector(
-                "div[data-sprint-id='10323'] span.days-left"
-            )
-            const remainingDays = element.textContent.match(/^\d+/g, '')[0]
+                const expectedPoints = getExpectedPoints(
+                    totalPoints,
+                    sprintDuration,
+                    remainingDays
+                )
+                const pointDiff = actualPoints - expectedPoints
 
-            const expectedPoints = getExpectedPoints(
-                totalPoints,
-                sprintDuration,
-                remainingDays
-            )
-            const pointDiff = actualPoints - expectedPoints
+                const expectedPercentage = getPercentage(
+                    totalPoints,
+                    expectedPoints
+                )
+                const actualPercentage = getPercentage(
+                    totalPoints,
+                    actualPoints
+                )
+                const percentageDiff = actualPercentage - expectedPercentage
 
-            const expectedPercentage = getPercentage(
-                totalPoints,
-                expectedPoints
-            )
-            const actualPercentage = getPercentage(totalPoints, actualPoints)
-            const percentageDiff = actualPercentage - expectedPercentage
+                const message = `- ${format(percentageDiff)}% (${format(
+                    pointDiff
+                )}pts) ${pointDiff > 0 ? 'ahead' : 'behind'}`
 
-            const message = `- ${Math.abs(percentageDiff)}% (${Math.abs(
-                pointDiff
-            )}pts) ${pointDiff > 0 ? 'ahead' : 'behind'}`
+                element.textContent += message
+            }
+        }
+        xhr.send()
 
-            element.textContent += message
+        const getExpectedPoints = (sprintPoints, duration, remainingDays) => {
+            let pointsPerday = sprintPoints / duration
+            return (duration - remainingDays) * pointsPerday
+        }
+
+        const getPercentage = (sprintPoints, points) => {
+            return (points / sprintPoints) * 100
+        }
+
+        const format = value => {
+            return Math.round(Math.abs(value))
         }
     }
-    xhr.send()
-}
-
-const getExpectedPoints = (sprintPoints, duration, remainingDays) => {
-    let pointsPerday = sprintPoints / duration
-    return (duration - remainingDays) * pointsPerday
-}
-
-const getPercentage = (sprintPoints, points) => {
-    return (points / sprintPoints) * 100
 }

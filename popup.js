@@ -1,19 +1,11 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 'use strict'
 
-let input = document.getElementById('boardId')
+const input = document.getElementById('sprintLink')
 
 input.onchange = function(element) {
-    let value = element.target.value
-    chrome.storage.sync.set({boardId: value}, function() {
-      console.log(`board id is ${boardId}.`);
-    });
-
-    chrome.runtime.sendMessage({ boardId: value }, function(response) {
-        console.log(response.farewell)
+    const link = element.target.value
+    const boardId = link.match(/\d+/g, '')[0]
+    chrome.storage.sync.set({ sprint: { boardId, link } }, function() {
+        console.log(`board id is ${boardId}.`)
     })
-    localStorage.setItem('boardId', value)
 }
